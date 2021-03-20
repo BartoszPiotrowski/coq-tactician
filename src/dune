@@ -7,6 +7,12 @@
    "g_ltac1_record"
    ltacrecord
    diagonal_iterative_search
+   forest_online_learner
+   tree_online
+   impurity
+   forest_online
+   data
+   utils
    naiveknn_learner
    naiveknn_subst_learner
    knnLSHForest

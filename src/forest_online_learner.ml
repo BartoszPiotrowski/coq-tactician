@@ -34,4 +34,4 @@ module OnlineForest : TacticianOnlineLearnerType = functor (TS : TacticianStruct
 
 end
 
-let () = register_online_learner "online-forest" (module OnlineForest)
+(* let () = register_online_learner "online-forest" (module OnlineForest) *)

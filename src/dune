@@ -6,6 +6,7 @@
  (modules (
    "g_ltac1_record"
    forest_online_learner
+   forest_plus_knn_online_learner
    tree_online
    impurity
    forest_online

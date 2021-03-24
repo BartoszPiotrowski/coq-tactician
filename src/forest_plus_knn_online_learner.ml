@@ -75,8 +75,10 @@ module OnlineForestPlusKnn : TacticianOnlineLearnerType = functor (TS : Tacticia
           db.entries in
       remove_dups_and_sort tdidfs
 
+(*
     let geom_mean x y =
         sqrt (x *. y)
+*)
 
     let interleave l1 l2 =
         let rec loop l l1 l2 =
@@ -87,9 +89,20 @@ module OnlineForestPlusKnn : TacticianOnlineLearnerType = functor (TS : Tacticia
         in
         loop [] l1 l2
 
+    let dedup l =
+        let rec loop dl l =
+            match l with
+            | [] -> List.rev dl
+            | (sc, tc) :: t ->
+                if List.exists (fun (_, tc') -> tc = tc') dl
+                then loop dl t else loop ((sc, tc) :: dl) t
+        in
+        loop [] l
+
     let merge_preds preds_knn preds_forest =
-        let n = max (List.length preds_knn) (List.length preds_forest) in
-        List.mapi (fun i (s, t) -> (float_of_int (n-i), t)) preds
+        let preds = interleave preds_forest preds_knn in
+        let n = List.length preds in
+        List.mapi (fun i (s, t) -> (float_of_int (n-i), t)) preds |> dedup
 
     let predict db f =
         if f = [] then IStream.empty else

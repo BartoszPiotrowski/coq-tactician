@@ -78,24 +78,18 @@ module OnlineForestPlusKnn : TacticianOnlineLearnerType = functor (TS : Tacticia
     let geom_mean x y =
         sqrt (x *. y)
 
+    let interleave l1 l2 =
+        let rec loop l l1 l2 =
+            match l1, l2 with
+            | [], l2 -> (List.rev l) @ l2
+            | l1, [] -> (List.rev l) @ l1
+            | h1 :: t1, h2 :: t2 -> loop (h2 :: h1 :: l) t1 t2
+        in
+        loop [] l1 l2
+
     let merge_preds preds_knn preds_forest =
-        let preds_knn_forest =
-            List.map
-            (fun (c, t) ->
-                let (cf, tf) =
-                    try List.find (fun (cf, tf) -> t = tf) preds_forest
-                    with Not_found -> (c, t) in
-                (geom_mean c cf, t))
-            preds_knn in
-        let preds_forest_knn =
-            List.map
-            (fun (c, t) ->
-                let (cf, tf) =
-                    try List.find (fun (cf, tf) -> t = tf) preds_knn
-                    with Not_found -> (c, t) in
-                (geom_mean c cf, t))
-            preds_forest in
-        preds_knn_forest @ preds_forest_knn
+        let n = max (List.length preds_knn) (List.length preds_forest) in
+        List.mapi (fun i (s, t) -> (float_of_int (n-i), t)) preds
 
     let predict db f =
         if f = [] then IStream.empty else

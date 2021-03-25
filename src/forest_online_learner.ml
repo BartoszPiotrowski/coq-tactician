@@ -17,10 +17,10 @@ module OnlineForest : TacticianOnlineLearnerType = functor (TS : TacticianStruct
     let add forest b obj =
       let feats = proof_state_to_ints b in
       Forest.add
-      ~n_feas:10
+      ~n_feas:1
       ~max_depth:500
       ~min_impur:0.5
-      ~n_trees:100
+      ~n_trees:1000
       forest (Data.labeled (feats, obj))
 
     let learn db _loc outcomes tac =

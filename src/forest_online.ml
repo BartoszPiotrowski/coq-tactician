@@ -7,6 +7,7 @@ module Make = functor (Data : Tree_online.DATA) -> struct
         forest example =
         let n = List.length forest in
         let add_tree = (n = 0) || ((Random.int n = 0) && n < n_trees) in
+        let forest = if n > n_trees then Utils.remove_last forest else forest in
         let updated_trees =
             List.map
             (fun tree -> Tree.add ~n_feas ~min_impur ~max_depth tree example)

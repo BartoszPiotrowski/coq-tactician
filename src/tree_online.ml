@@ -1,14 +1,17 @@
 module type DATA = sig
+    type feature
     type features
     type 'a example = features * ('a option)
     type 'a examples = 'a example list
     type direction = Left | Right
     type rule = features -> direction
+    exception Rule_not_found
+    val rule_of_fea : feature -> rule
     val is_empty : 'a examples -> bool
     val add : 'a examples -> 'a example -> 'a examples
     val features : 'a example -> features
-    val split : rule -> 'a examples -> 'a examples * 'a examples
-    val gini_rule : ?m:int -> 'a examples -> rule
+    val split : feature -> 'a examples -> 'a examples * 'a examples
+    val gini_rule : ?n_feas:int -> 'a examples -> feature
     val random_label : 'a examples -> 'a
     val random_example : 'a examples -> 'a example
     val fold_left : ('a -> 'b example -> 'a) -> 'a -> 'b examples -> 'a
@@ -19,7 +22,7 @@ end
 module Make = functor (Data : DATA) -> struct
 
     type 'a tree =
-        | Node of Data.rule * ('a tree) * ('a tree)
+        | Node of Data.feature * ('a tree) * ('a tree)
         | Leaf of 'a * ('a Data.examples)
 
     let leaf example =
@@ -44,10 +47,10 @@ module Make = functor (Data : DATA) -> struct
     (* pass the example to a leaf; if a condition is satisfied, extend the tree *)
     let add (tree : 'a tree) (example : 'a Data.example) : 'a tree =
         let rec loop = function
-            | Node (rule, tree_l, tree_r) ->
-                (match rule (Data.features example) with
-                | Left  -> Node(rule, loop tree_l, tree_r)
-                | Right -> Node(rule, tree_l, loop tree_r))
+            | Node (fea, tree_l, tree_r) ->
+                (match (Data.rule_of_fea fea) (Data.features example) with
+                | Left  -> Node(fea, loop tree_l, tree_r)
+                | Right -> Node(fea, tree_l, loop tree_r))
             | Leaf (label, examples) ->
                 let examples = Data.add examples example in
                 if extend examples then make_new_node examples
@@ -63,8 +66,8 @@ module Make = functor (Data : DATA) -> struct
         let rec loop tree =
             match tree with
             | Leaf (cls, _) -> cls
-            | Node (rule, tree_l, tree_r) ->
-                (match rule (Data.features example) with
+            | Node (fea, tree_l, tree_r) ->
+                (match (Data.rule_of_fea fea) (Data.features example) with
                 | Left  -> loop tree_l
                 | Right -> loop tree_r)
         in loop tree

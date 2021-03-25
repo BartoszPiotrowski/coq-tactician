@@ -10,11 +10,16 @@ module OnlineForest : TacticianOnlineLearnerType = functor (TS : TacticianStruct
 
     type model = (TS.tactic Tree.tree) list
 
-    let empty () = []
+    let empty () = Forest.empty
 
     let add forest b obj =
       let feats = remove_feat_kind (proof_state_to_ints b) in
-      Forest.add forest (Data.labeled (feats, obj))
+      Forest.add
+      ~n_feas:1
+      ~max_depth:500
+      ~min_impur:0.5
+      ~n_trees:100
+      forest (Data.labeled (feats, obj))
 
     let learn db _loc outcomes tac =
       List.fold_left (fun db out -> add db out.before tac) db outcomes
@@ -24,6 +29,7 @@ module OnlineForest : TacticianOnlineLearnerType = functor (TS : TacticianStruct
       let feats = remove_feat_kind (proof_state_to_ints (List.hd f).state) in
       let example = Data.unlabeled feats in
       let out = Forest.score forest example in
+      let out = List.map (fun (x, y) -> (y, x)) out in
       let out = remove_dups_and_sort out in
       let out = List.map (fun (a, c) -> { confidence = a; focus = 0; tactic = c }) out in
       IStream.of_list out

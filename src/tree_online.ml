@@ -30,13 +30,14 @@ module Make = functor (Data : DATA) -> struct
 
     (* returns Node(split_rule, Leaf (label1, stats1), Leaf(label2, stats2)) *)
     let make_new_node examples =
-        let rule = Data.gini_rule examples in
-        let examples_l, examples_r = Data.split rule examples in
-        if Data.is_empty examples_l || Data.is_empty examples_r
-        then Leaf(Data.random_label examples, examples)
-        else Node(rule,
-            Leaf(Data.random_label examples_l, examples_l),
-            Leaf(Data.random_label examples_r, examples_r))
+        try
+            let rule = Data.gini_rule examples in
+            let examples_l, examples_r = Data.split rule examples in
+            Node(rule,
+                Leaf(Data.random_label examples_l, examples_l),
+                Leaf(Data.random_label examples_r, examples_r))
+        with Data.Rule_not_found ->
+            Leaf(Data.random_label examples, examples)
 
     let extend examples =
         let labels = Data.labels examples in

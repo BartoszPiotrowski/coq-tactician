@@ -17,7 +17,7 @@ module OnlineForest : TacticianOnlineLearnerType = functor (TS : TacticianStruct
     let add forest b obj =
       let feats = proof_state_to_ints b in
       Forest.add
-      ~n_trees:640
+      ~n_trees:320
       ~remove_old:true
       forest (Data.labeled (feats, obj))
 

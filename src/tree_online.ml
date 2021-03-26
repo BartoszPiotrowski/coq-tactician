@@ -38,14 +38,12 @@ module Make = functor (Data : DATA) -> struct
             Leaf(Data.random_label examples_l, examples_l),
             Leaf(Data.random_label examples_r, examples_r))
 
-    let extend examples =
+    let init_cond ?(min_impur=0.5) examples =
         let labels = Data.labels examples in
-        let imp = Impurity.gini_impur labels in
-        imp > 0.5
-    (* TODO more sophisticated condition needed *)
+        min_impur < (Impurity.gini_impur labels)
 
     (* pass the example to a leaf; if a condition is satisfied, extend the tree *)
-    let add (tree : 'a tree) (example : 'a Data.example) : 'a tree =
+    let add ?(min_impur=0.5) tree example =
         let rec loop = function
             | Node (fea, tree_l, tree_r) ->
                 (match (Data.rule_of_fea fea) (Data.features example) with
@@ -53,7 +51,7 @@ module Make = functor (Data : DATA) -> struct
                 | Right -> Node(fea, tree_l, loop tree_r))
             | Leaf (label, examples) ->
                 let examples = Data.add examples example in
-                if extend examples then make_new_node examples
+                if init_cond examples then make_new_node examples
                 else Leaf (label, examples)
         in
         loop tree

@@ -16,7 +16,8 @@ module OnlineForest : TacticianOnlineLearnerType = functor (TS : TacticianStruct
 
     let add forest b obj =
       let feats = proof_state_to_ints b in
-      Forest.add forest (Data.labeled (feats, obj))
+      Forest.add ~n_trees:320 ~remove_old:true
+      forest (Data.labeled (feats, obj))
 
     let learn db _loc outcomes tac =
       List.fold_left (fun db out -> add db out.before tac) db outcomes

@@ -51,7 +51,7 @@ module Make = functor (Data : DATA) -> struct
                 | Right -> Node(fea, tree_l, loop tree_r))
             | Leaf (label, examples) ->
                 let examples = Data.add examples example in
-                if init_cond examples then make_new_node examples
+                if init_cond ~min_impur examples then make_new_node examples
                 else Leaf (label, examples)
         in
         loop tree
